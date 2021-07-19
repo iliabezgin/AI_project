@@ -9,6 +9,10 @@ class Agent(object):
 
 	@abc.abstractmethod
 	def get_action(self, game_state: Game):
+		'''
+		Returns action for the current game state
+		:param game_state:
+		'''
 		return
 
 	def stop_running(self):
@@ -44,7 +48,6 @@ class ComputerAgent(Agent):
 			ignore_list.append(selected_block)
 			selected_block = self.select_block(game_state, ignore_list)
 			legal_moves = game_state.get_legal_actions(selected_block)
-		ignore_list = []
 
 		# Choose one of the best actions
 		scores = [self.board_heuristic(game_state.generate_successor(action)) for action in legal_moves]

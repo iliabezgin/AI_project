@@ -31,6 +31,10 @@ class Game:
 		self.selected_block = None
 
 	def apply_action(self, action: Action):
+		'''
+		Applies action on current board (without GUI)
+		:param action: action to apply
+		'''
 		x = action.x
 		y = action.y
 		coordinates = action.block.coord_array
@@ -140,8 +144,3 @@ class Game:
 					if self.fits(x, y, block.coord_array):
 						return True
 		return False
-
-
-
-def evaluation_function(current_game_state: Game):
-	return 0

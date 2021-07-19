@@ -5,9 +5,12 @@ from game_state import Game
 
 
 def test_board_heuristic(game_state: Game):
+	# Instead 0 should return your board heuristic function
 	return 0
 
+
 def test_block_heuristic(game_state: Game, block):
+	# Instead 0 should return your block heuristic function
 	return 0
 
 

@@ -51,15 +51,15 @@ class Main:
             self.window.update()
             self._game_loop()
 
-        # self.render_current_blocks()
+        self.render_current_blocks()
         self.window.mainloop()
 
-    def agent_game(self, agent):
-        # while self.game.is_action_possible():
-        #     action =
-        pass
 
     def _game_loop(self):
+        '''
+        Main loop
+        :return: final score
+        '''
         while self.game.is_action_possible():
             if self.sleep_between_actions:
                 time.sleep(1)
@@ -67,11 +67,8 @@ class Main:
 
             self.apply_action(action)
             self.render_current_blocks()
-            #TODO: now don't shows pieces on the board
             self.window.update()
-            # for coord in self.game.field
-            #TODO
-            # self.display.update_state(self._state, action, opponent_action)
+
         GUILoseScreen(self.window, self.game, self.lose_img)
         print(self.game.points)
         return self.game.points
