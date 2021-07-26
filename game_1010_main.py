@@ -46,7 +46,6 @@ class Main:
             self.canvas.bind("<Button-1>", self.canvas_click)
             self.canvas.bind("<Motion>", self.render_preview)
             self.canvas.bind("<Leave>", self.remove_last_values)
-
         else:
             self.window.update()
             self._game_loop()
@@ -110,30 +109,33 @@ class Main:
         x = int(event.x / 50)
         y = int(event.y / 50)
         if (x < 10) and (y < 10):
-            coordinates = self.game.selected_block.coord_array
-            if self.game.fits(x, y, coordinates):
-                self.place(x, y, coordinates)
-                block = self.game.selected_block
-                block.destroy()
-                self.game.current_blocks.remove(block)
-                if len(self.game.current_blocks) == 0:
-                    self.game.generate_blocks()
-                    self.render_current_blocks()
+            if self.game.selected_block is not None:
 
-            if len(self.game.check_lines()) > 0:
-                for lines in self.game.check_lines():
-                    self.game.clear_line(lines)
-                    for i in range(0, 10):
-                        self.clear_rect_on_coordinates(i, lines)
+                coordinates = self.game.selected_block.coord_array
+                if self.game.fits(x, y, coordinates):
+                    self.place(x, y, coordinates)
+                    block = self.game.selected_block
+                    block.destroy()
+                    self.game.selected_block = None
+                    self.game.current_blocks.remove(block)
+                    if len(self.game.current_blocks) == 0:
+                        self.game.generate_blocks()
+                        self.render_current_blocks()
 
-            if len(self.game.check_columns()) > 0:
-                for columns in self.game.check_columns():
-                    self.game.clear_column(columns)
-                    for i in range(0, 10):
-                        self.clear_rect_on_coordinates(columns, i)
+                if len(self.game.check_lines()) > 0:
+                    for lines in self.game.check_lines():
+                        self.game.clear_line(lines)
+                        for i in range(0, 10):
+                            self.clear_rect_on_coordinates(i, lines)
 
-            if not self.game.is_action_possible():
-                GUILoseScreen(self.window, self.game, self.lose_img)
+                if len(self.game.check_columns()) > 0:
+                    for columns in self.game.check_columns():
+                        self.game.clear_column(columns)
+                        for i in range(0, 10):
+                            self.clear_rect_on_coordinates(columns, i)
+
+                if not self.game.is_action_possible():
+                    GUILoseScreen(self.window, self.game, self.lose_img)
 
     def render_preview(self, event):
         x = int(event.x / 50)
