@@ -66,6 +66,7 @@ class Main:
             action = self.agent.get_action(self.game)
 
             self.apply_action(action)
+            #GUI
             self.render_current_blocks()
             self.window.update()
 
