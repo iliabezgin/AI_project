@@ -75,6 +75,13 @@ class Game:
 		successor.apply_action(action)
 		return successor
 
+	def get_successors(self):
+		successors = []
+		for block in self.current_blocks:
+			for action in self.get_legal_actions(block):
+				successors.append((self.generate_successor(action), action))
+		return successors
+
 	def check_lines(self):
 		lines = []
 		for line in range(0, 10):

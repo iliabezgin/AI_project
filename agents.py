@@ -1,6 +1,7 @@
 import abc
 from game_state import Game
 import numpy as np
+from util import PriorityQueue
 
 
 class Agent(object):
@@ -70,6 +71,56 @@ class ComputerAgent(Agent):
 	def get_type(self):
 		return "ComputerAgent"
 
+class SearchAgent(Agent):
+	def __init__(self, board_heuristic):
+		super().__init__()
+		self.board_heuristic = board_heuristic
+		self.actions = []
+
+	def get_action(self, game_state: Game):
+		if len(self.actions) == 0:
+			self.actions = self.a_star_search(game_state)
+		if len(self.actions) == 0:
+			self.actions = self.a_star_search(game_state)
+		action = self.actions.pop(0)
+		for block in game_state.current_blocks:
+			if block.block_list_index == action.block.block_list_index:
+				action.block = block
+				break
+		return action
+
+	def get_type(self):
+		return "SearchAgent"
+
+	def a_star_search(self, game):
+		"""
+		Search the node that has the lowest combined cost and heuristic first.
+		"""
+		# return general_search(problem, util.PriorityQueue(), priority=True, heuristic=heuristic)
+		fringe = PriorityQueue()
+		start = True
+		visited = set()
+		current = Node(game, [])
+		fringe.push(Node(game, []), 0)
+		while not fringe.isEmpty():
+			current = fringe.pop()
+			if current.state not in visited:
+				visited.add(current.state)
+				if not start and len(current.state.current_blocks) == 3:
+					return current.actions
+				start = False
+				for triplet in current.state.get_successors():
+					fringe.push(Node(triplet[0], current.actions + [triplet[1]]), -self.board_heuristic(triplet[0]))
+		return current.actions
+
+
+
+
+class Node:
+	def __init__(self, state, actions):
+		self.state = state
+		self.actions = actions
+
 class AgentFactory():
 
 	@staticmethod
@@ -78,4 +129,5 @@ class AgentFactory():
 			return HumanAgent()
 		if agent_name == "ComputerAgent":
 			return ComputerAgent(test_board_heuristic, test_block_heuristic)
-
+		if agent_name == "SearchAgent":
+			return SearchAgent(test_board_heuristic)
