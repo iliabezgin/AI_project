@@ -16,7 +16,7 @@ def test_block_heuristic(game_state: Game, block):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='1010! game.')
-	agents = ['HumanAgent', 'ComputerAgent', 'SearchAgent']
+	agents = ['HumanAgent', 'ComputerAgent', 'SearchAgent', 'AlphaBetaAgent', 'MinmaxAgent']
 	parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
 	parser.add_argument('--sleep', help='Does sleep between actions', default=True, type=bool)
 
