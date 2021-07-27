@@ -219,3 +219,27 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 if alpha >= beta:
                     break
             return beta
+
+class LocalSearchAgent(MultiAgentSearchAgent):
+
+    def get_type(self):
+        return "LocalSearchAgent"
+
+    def local_search(self):
+        actions = []
+        if (len( game_state.current_blocks) == 3):
+            for block in game_state.current_blocks:
+                actions += game_state.get_legal_actions(block)
+            action = random.choise(actions)
+            apply_action(action)
+        while(len( game_state.current_blocks) != 0 ):
+            actions = []
+            for block in game_state.current_blocks:
+                actions += game_state.get_legal_actions(block)
+            max_act, max_val = 0
+            for action in actions:
+                success = generate_successor_2(action, len(game_state.current_blocks))
+                if success.get_points() > max_val:
+                    max_act = action
+                    max_val = success.get_points()
+            apply_action(max_act)
