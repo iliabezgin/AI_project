@@ -53,7 +53,6 @@ class Main:
         self.render_current_blocks()
         self.window.mainloop()
 
-
     def _game_loop(self):
         '''
         Main loop
@@ -86,8 +85,10 @@ class Main:
         coordinates = action.block.coord_array
         if self.game.fits(x, y, coordinates):
             for index in range(0, len(coordinates)):
-                self.draw_rect_on_coordinates(x + coordinates[index][0], y + coordinates[index][1])
-                self.game.set_filed(x + coordinates[index][0], y + coordinates[index][1], 1)
+                self.draw_rect_on_coordinates(x + coordinates[index][0],
+                                              y + coordinates[index][1])
+                self.game.set_filed(x + coordinates[index][0],
+                                    y + coordinates[index][1], 1)
             self.selected_block = None
             for block in self.game.current_blocks:
                 if block.block_list_index == action.block.block_list_index:
@@ -152,12 +153,15 @@ class Main:
             self.last_y = y
             if self.game.selected_block is not None:
                 if 0 <= x and 0 <= y and x < 10 and y < 10:
-                    if self.game.fits(x, y, self.game.selected_block.coord_array):
+                    if self.game.fits(x, y,
+                                      self.game.selected_block.coord_array):
                         for index in range(0, len(self.last_preview)):
                             lx = self.last_preview[index][0]
                             ly = self.last_preview[index][1]
                             if self.game.board[ly][lx] == 0:
-                                self.draw_rect(self.last_preview[index][0], self.last_preview[index][1], "lightgray")
+                                self.draw_rect(self.last_preview[index][0],
+                                               self.last_preview[index][1],
+                                               "lightgray")
                         if self.game.selected_block is not None:
                             ca = self.game.selected_block.coord_array
                             self.last_preview = []
@@ -166,12 +170,15 @@ class Main:
                                 ty = y + ca[index][1]
                                 if tx < 10 and ty < 10:
                                     self.draw_rect(tx, ty, "yellow")
-                                    self.last_preview.append([x + ca[index][0], y + ca[index][1]])
+                                    self.last_preview.append(
+                                        [x + ca[index][0], y + ca[index][1]])
 
     def place(self, x, y, coordinates):
         for index in range(0, len(coordinates)):
-            self.draw_rect_on_coordinates(x + coordinates[index][0], y + coordinates[index][1])
-            self.game.set_filed(x + coordinates[index][0], y + coordinates[index][1], 1)
+            self.draw_rect_on_coordinates(x + coordinates[index][0],
+                                          y + coordinates[index][1])
+            self.game.set_filed(x + coordinates[index][0],
+                                y + coordinates[index][1], 1)
 
     def remove_last_values(self, event):
         self.last_x = None
@@ -180,7 +187,8 @@ class Main:
             lx = self.last_preview[index][0]
             ly = self.last_preview[index][1]
             if self.game.board[ly][lx] == 0:
-                self.draw_rect(self.last_preview[index][0], self.last_preview[index][1], "lightgray")
+                self.draw_rect(self.last_preview[index][0],
+                               self.last_preview[index][1], "lightgray")
 
     def draw_rect_on_coordinates(self, x, y):
         self.draw_rect(x, y, "orange")
@@ -191,37 +199,32 @@ class Main:
     def draw_rect(self, x, y, color):
         x = x * 50
         y = y * 50
-        self.canvas.create_rectangle(x, y, x + 50, y + 50, fill=color, outline="")
+        self.canvas.create_rectangle(x, y, x + 50, y + 50, fill=color,
+                                     outline="")
         self.restore_grid(self.img_id)
 
     def render_current_blocks(self):
         for index in range(0, len(self.game.current_blocks)):
             c = self.game.current_blocks[index].get_block_canvas()
-            c.place(x=50 + 166 * (index + 1) - 83 - int(c["width"]) / 2, y=75 + 500 + 25 + (62 - int(c["height"]) / 2))
+            c.place(x=50 + 166 * (index + 1) - 83 - int(c["width"]) / 2,
+                    y=75 + 500 + 25 + (62 - int(c["height"]) / 2))
 
     def restore_grid(self, img_id):
-        self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor="nw")
+        self.img_id = self.canvas.create_image(0, 0, image=self.img,
+                                               anchor="nw")
         self.canvas.delete(img_id)
 
 
 class GUILoseScreen:
     def __init__(self, window, game, lose_img):
-        canvas = Canvas(window, width=600, height=725, bg="#FFFFFF", highlightthickness=0)
+        canvas = Canvas(window, width=600, height=725, bg="#FFFFFF",
+                        highlightthickness=0)
         canvas.create_image(120, 10, image=lose_img, anchor="nw")
         canvas.place(x=0, y=0)
-        self.points_label = Label(canvas, font=("Segoe UI Light", 24), bg="#474747", fg="lightgray")
+        self.points_label = Label(canvas, font=("Segoe UI Light", 24),
+                                  bg="#474747", fg="lightgray")
         self.points_label["text"] = f"Score: {str(game.points)}"
-        self.points_label.place(x=(300 - self.points_label.winfo_width() / 2) - 50, y=10)
-
-
-
-
-
-
-
-
-
-
+        self.points_label.place(
+            x=(300 - self.points_label.winfo_width() / 2) - 50, y=10)
 
 # main = Main()
-

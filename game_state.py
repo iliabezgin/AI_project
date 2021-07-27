@@ -29,6 +29,7 @@ class Game:
 		self.blocks = BLOCKS()
 		self.current_blocks = []
 		self.selected_block = None
+		self.highest_cells = find_highest_cell(self)
 
 	def apply_action(self, action: Action):
 		'''
@@ -62,8 +63,8 @@ class Game:
 	def get_legal_actions(self, block: Block):
 		board_size = len(self.board)
 		actions = []
-		for x in range(board_size - block.w + 1):
-			for y in range(board_size - block.h + 1):
+		for x in range(board_size):
+			for y in range(board_size):
 				if self.fits(x, y, block.coord_array):
 					actions.append(Action(x, y, block))
 		return actions
@@ -81,6 +82,21 @@ class Game:
 			for action in self.get_legal_actions(block):
 				successors.append((self.generate_successor(action), action))
 		return successors
+
+	def generate_successor_2(self, action: Action,size:int):
+		if size>1:
+			successor = Game(None)
+			successor.board = copy.deepcopy(self.board)
+			successor.current_blocks = [Block(block.block_list_index, self.blocks, None, False) for block in self.current_blocks]
+			successor.apply_action(action)
+			return successor
+		else:
+			successor = Game(None)
+			successor.board = copy.deepcopy(self.board)
+			successor.current_blocks = self.current_blocks
+			successor.apply_action(action)
+			successor.current_blocks = []
+			return successor
 
 	def check_lines(self):
 		lines = []

@@ -1,6 +1,8 @@
 import abc
 from game_state import Game
 import numpy as np
+
+from our_agents import AlphaBetaAgent
 from util import PriorityQueue
 
 
@@ -122,7 +124,7 @@ class Node:
 		self.actions = actions
 
 class AgentFactory():
-
+	from game_agents_ronel_omri import MinmaxAgent, AlphaBetaAgent
 	@staticmethod
 	def create_agent(agent_name, test_board_heuristic, test_block_heuristic):
 		if agent_name == "HumanAgent":
@@ -131,3 +133,5 @@ class AgentFactory():
 			return ComputerAgent(test_board_heuristic, test_block_heuristic)
 		if agent_name == "SearchAgent":
 			return SearchAgent(test_board_heuristic)
+		if agent_name == "AlphaBetaAgent":
+			return AlphaBetaAgent()
