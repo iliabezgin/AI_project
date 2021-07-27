@@ -7,7 +7,7 @@ from heusristics_ilia import *
 def test_board_heuristic(game_state: Game):
 	# Instead 0 should return your board heuristic function
 	return board_heuristic_1(game_state)
-
+	# return 0
 
 def test_block_heuristic(game_state: Game, block):
 	# Instead 0 should return your block heuristic function
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='1010! game.')
 	agents = ['HumanAgent', 'ComputerAgent', 'SearchAgent']
 	parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
-	parser.add_argument('--sleep', help='Does sleep between actions', default=True, type=bool)
+	parser.add_argument('--sleep', help='Does sleep between actions', default=True, action='store_true')
 
 	args = parser.parse_args()
 	agent = AgentFactory.create_agent(args.agent, test_board_heuristic, test_block_heuristic)
