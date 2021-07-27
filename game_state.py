@@ -63,8 +63,8 @@ class Game:
 	def get_legal_actions(self, block: Block):
 		board_size = len(self.board)
 		actions = []
-		for x in range(board_size - block.w + 1):
-			for y in range(board_size - block.h + 1):
+		for x in range(board_size):
+			for y in range(board_size):
 				if self.fits(x, y, block.coord_array):
 					actions.append(Action(x, y, block))
 		return actions
