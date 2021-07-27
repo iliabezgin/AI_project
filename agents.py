@@ -124,7 +124,7 @@ class Node:
 		self.actions = actions
 
 class AgentFactory():
-	from our_agents import MinmaxAgent, AlphaBetaAgent
+	from game_agents_ronel_omri import MinmaxAgent, AlphaBetaAgent
 	@staticmethod
 	def create_agent(agent_name, test_board_heuristic, test_block_heuristic):
 		if agent_name == "HumanAgent":
