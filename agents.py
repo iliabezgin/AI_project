@@ -104,8 +104,8 @@ class SearchAgent(Agent):
 		fringe.push(Node(game, []), 0)
 		while not fringe.isEmpty():
 			current = fringe.pop()
-			if current.state not in visited:
-				visited.add(current.state)
+			if str(current.state.board) not in visited:
+				visited.add(str(current.state.board))
 				if not start and len(current.state.current_blocks) == 3:
 					return current.actions
 				start = False

@@ -62,6 +62,13 @@ class Main:
         while self.game.is_action_possible():
             if self.sleep_between_actions:
                 time.sleep(1)
+            #
+            # a = Action(0, 0, self.game.current_blocks[0])
+            # first = self.game.generate_successor(a)
+            # second = self.game.generate_successor(a)
+            # s = set()
+            # s.add(str(first.board))
+            # print(str(second.board) in s)
             action = self.agent.get_action(self.game)
 
             self.apply_action(action)
