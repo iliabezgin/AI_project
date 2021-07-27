@@ -2,11 +2,11 @@ import argparse
 import game_1010_main
 from agents import *
 from game_state import Game
-
+from heusristics_ilia import *
 
 def test_board_heuristic(game_state: Game):
 	# Instead 0 should return your board heuristic function
-	return 0
+	return board_heuristic_1(game_state)
 
 
 def test_block_heuristic(game_state: Game, block):

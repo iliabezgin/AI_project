@@ -1,3 +1,3 @@
 # AI_project
 Ussage:
-python3 main.py --agent=ComputerAgent --sleep=True
+python3 main.py --agent=ComputerAgent --sleep
