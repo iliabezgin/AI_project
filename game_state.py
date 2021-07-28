@@ -1,6 +1,7 @@
 from blocks import Block, BLOCKS
 from action import *
 from random import randint
+# from hueristics import find_highest_cell
 
 import copy
 BOARD_SIZE = 10
@@ -29,7 +30,7 @@ class Game:
 		self.blocks = BLOCKS()
 		self.current_blocks = []
 		self.selected_block = None
-		self.highest_cells = find_highest_cell(self)
+		# self.highest_cells = find_highest_cell(self)
 
 	def apply_action(self, action: Action):
 		'''

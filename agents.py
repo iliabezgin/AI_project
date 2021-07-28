@@ -2,7 +2,7 @@ import abc
 from game_state import Game
 import numpy as np
 
-from our_agents import AlphaBetaAgent
+from game_agents_ronel_omri import AlphaBetaAgent
 from util import PriorityQueue
 
 

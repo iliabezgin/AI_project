@@ -1,6 +1,6 @@
-from game_state import *
 # from agents import Agent
 from action import *
+from game_state import Game
 import abc
 import numpy as np
 
