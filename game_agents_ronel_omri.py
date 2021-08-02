@@ -3,6 +3,7 @@ from action import *
 from game_state import Game
 import abc
 import numpy as np
+import copy
 
 
 class Agent(object):
@@ -138,9 +139,9 @@ class MinmaxAgent(MultiAgentSearchAgent):
                  list_of_combinations]))
 
 
-def make_sub_group(list, size):
+def make_sub_group(_list, size):
     from itertools import combinations_with_replacement, combinations
-    return list(combinations(list, size))
+    return list(combinations(_list, size))
     # return list(combinations_with_replacement(s, n))
 
 

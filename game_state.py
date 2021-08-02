@@ -30,7 +30,7 @@ class Game:
 		self.blocks = BLOCKS()
 		self.current_blocks = []
 		self.selected_block = None
-		# self.highest_cells = find_highest_cell(self)
+		self.highest_cells = self.find_highest_cell()
 
 	def apply_action(self, action: Action):
 		'''
@@ -60,6 +60,8 @@ class Game:
 		if len(columns) > 0:
 			for columns in self.check_columns():
 				self.clear_column(columns)
+
+		self.update_highest_cells()
 
 	def get_legal_actions(self, block: Block):
 		board_size = len(self.board)
@@ -168,3 +170,14 @@ class Game:
 					if self.fits(x, y, block.coord_array):
 						return True
 		return False
+
+	def find_highest_cell(self):
+		highest_cells = {}
+		for row in range(10):
+			for col in range(10):
+				if self.board[row][col] and col not in highest_cells:
+					highest_cells[col] = row
+		return highest_cells
+
+	def update_highest_cells(self):
+		self.highest_cells = self.find_highest_cell()

@@ -46,12 +46,14 @@ class Main:
             self.canvas.bind("<Button-1>", self.canvas_click)
             self.canvas.bind("<Motion>", self.render_preview)
             self.canvas.bind("<Leave>", self.remove_last_values)
-        else:
-            self.window.update()
-            self._game_loop()
+            self.render_current_blocks()
+            self.window.mainloop()
 
-        self.render_current_blocks()
-        self.window.mainloop()
+        else:
+            self.render_current_blocks()
+            self.window.update()
+            self.points = self._game_loop()
+
 
     def _game_loop(self):
         '''
@@ -112,6 +114,8 @@ class Main:
                 self.game.clear_column(column)
                 for i in range(0, 10):
                     self.clear_rect_on_coordinates(column, i)
+
+        self.game.update_highest_cells()
 
     def canvas_click(self, event):
         x = int(event.x / 50)
@@ -213,6 +217,10 @@ class Main:
         self.img_id = self.canvas.create_image(0, 0, image=self.img,
                                                anchor="nw")
         self.canvas.delete(img_id)
+
+    def destroy(self):
+        self.canvas.destroy()
+        self.window.destroy()
 
 
 class GUILoseScreen:
