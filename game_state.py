@@ -15,7 +15,7 @@ class Game:
 		else:
 			self.gui_for_blocks = True
 		self.board = [
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # to get coordinate x, y call board[y][x]
 			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -66,8 +66,8 @@ class Game:
 	def get_legal_actions(self, block: Block):
 		board_size = len(self.board)
 		actions = []
-		for x in range(board_size):
-			for y in range(board_size):
+		for x in range(board_size - block.w + 1):
+			for y in range(board_size - block.h + 1):
 				if self.fits(x, y, block.coord_array):
 					actions.append(Action(x, y, block))
 		return actions
@@ -75,6 +75,7 @@ class Game:
 	def generate_successor(self, action: Action):
 		successor = Game(None)
 		successor.board = copy.deepcopy(self.board)
+		successor.points = self.points
 		successor.current_blocks = [Block(block.block_list_index, self.blocks, None, False) for block in self.current_blocks]
 		successor.apply_action(action)
 		return successor
@@ -175,8 +176,11 @@ class Game:
 		highest_cells = {}
 		for row in range(10):
 			for col in range(10):
-				if self.board[row][col] and col not in highest_cells:
-					highest_cells[col] = row
+				if col not in highest_cells:
+					if self.board[row][col]:
+						highest_cells[col] = row
+					else:
+						highest_cells[col] = 9
 		return highest_cells
 
 	def update_highest_cells(self):

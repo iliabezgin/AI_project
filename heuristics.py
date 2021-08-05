@@ -62,8 +62,10 @@ def identity_func(game: Game, hole_type):
 
 def square_func(game: Game, hole_type):
     if hole_type == 1:
-        return find_hole_1(game) * find_hole_1(game)
-    return find_hole_2(game) * find_hole_2(game)
+        find_hole_1_score = find_hole_1(game)
+        return find_hole_1_score ** 2
+    find_hole_2_score = find_hole_2(game)
+    return find_hole_2_score ** 2
 
 ############
 # best score:

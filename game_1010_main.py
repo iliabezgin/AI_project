@@ -41,6 +41,7 @@ class Main:
 
         self.game = Game(self)
         self.game.generate_blocks()
+        self.turns = 0
         # GUILoseScreen(self.window, self.game, self.lose_img)
         if agent.get_type() == "HumanAgent":
             self.canvas.bind("<Button-1>", self.canvas_click)
@@ -76,6 +77,7 @@ class Main:
             #GUI
             self.render_current_blocks()
             self.window.update()
+            self.turns += 1
 
         GUILoseScreen(self.window, self.game, self.lose_img)
         print(self.game.points)
