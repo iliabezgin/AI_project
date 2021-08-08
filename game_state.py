@@ -1,3 +1,5 @@
+import random
+
 from blocks import Block, BLOCKS
 from action import *
 from random import randint
@@ -132,8 +134,9 @@ class Game:
 
 	def add_points(self, points):
 		self.points += points
-		self.gui.points_label["text"] = str(self.points)
-		self.gui.points_label.place(x=(300 - self.gui.points_label.winfo_width() / 2), y=10)
+		if self.gui is not None:
+			self.gui.points_label["text"] = str(self.points)
+			self.gui.points_label.place(x=(300 - self.gui.points_label.winfo_width() / 2), y=10)
 
 	def clear_line(self, index):
 		for i in range(0, 10):
@@ -144,14 +147,15 @@ class Game:
 			self.set_filed(index, i, 0)
 
 	def set_filed(self, x, y, full):
-		if self.gui is not None:
-			self.add_points(1)
+		self.add_points(1)
 		self.board[y][x] = full
 
 	def generate_blocks(self):
 		self.current_blocks = []
 		for i in range(0, 3):
-			self.current_blocks.append(Block(randint(0, len(self.blocks.block_list) - 1), self.blocks, self.gui, self.gui_for_blocks))
+			self.current_blocks.append(Block(random.choices(range(len(self.blocks.block_list)), weights=self.blocks.probabilities, k=1),
+											 self.blocks, self.gui, self.gui_for_blocks))
+
 
 	def fits(self, x, y, coordinates):
 		for index in range(0, len(coordinates)):

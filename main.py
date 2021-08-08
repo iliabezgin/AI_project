@@ -24,7 +24,7 @@ def test_board_heuristic(game_state: Game):
 
 def test_board_action_heuristic(game_state: Game, action):
 	# Instead 0 should return your board-action heuristic function
-	val = 2.5 * surface_heuristic(game_state, action) + row_col_completeness_heuristic(game_state, action)
+	val = 2.5 * surface_heuristic(game_state, action) + 2 * row_col_completeness_heuristic(game_state, action)
 	# print(val)
 	return val
 	# return 0

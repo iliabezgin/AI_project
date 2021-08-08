@@ -115,8 +115,7 @@ class SearchAgent(Agent):
 				for triplet in current.state.get_successors():
 					priority = self.board_heuristic(triplet[0]) + self.board_action_heuristic(current.state, triplet[1])
 					# print(priority)
-					fringe.push(Node(triplet[0], current.actions + [triplet[1]]),
-								- priority)
+					fringe.push(Node(triplet[0], current.actions + [triplet[1]]), - priority)
 		return current.actions
 
 
