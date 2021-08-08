@@ -101,7 +101,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         # print(len(actions), end=" ")
         # print(len(game_state.current_blocks))
         successors = np.array(
-            [self.Minimax(game_state.generate_successor(action), 0, False) for action in actions])
+            [self.Minimax(game_state.generate_successor(action, True), 0, False) for action in actions])
         # return the max
         return actions[np.argmax(successors)]
 
@@ -173,7 +173,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # print(11111111111111111111,len(actions),len(game_state.current_blocks))
         best = actions[0]
         for action in actions:
-            possible_move = game_state.generate_successor(action)
+            possible_move = game_state.generate_successor(action, True)
             n_alpha = self.AlphaBetaPruning(possible_move, depth=0, alpha=alpha, beta=beta, maxPlayer=False)
             if n_alpha > alpha:
                 best = action

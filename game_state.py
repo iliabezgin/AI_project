@@ -32,7 +32,7 @@ class Game:
 		self.selected_block = None
 		self.highest_cells = self.find_highest_cell()
 
-	def apply_action(self, action: Action):
+	def apply_action(self, action: Action, clear_line: bool):
 		'''
 		Applies action on current board (without GUI)
 		:param action: action to apply
@@ -50,16 +50,17 @@ class Game:
 			if len(self.current_blocks) == 0:
 				self.generate_blocks()
 
-		lines = self.check_lines()
-		columns = self.check_columns()
+		if clear_line:
+			lines = self.check_lines()
+			columns = self.check_columns()
 
-		if len(lines) > 0:
-			for line in lines:
-				self.clear_line(line)
+			if len(lines) > 0:
+				for line in lines:
+					self.clear_line(line)
 
-		if len(columns) > 0:
-			for columns in self.check_columns():
-				self.clear_column(columns)
+			if len(columns) > 0:
+				for columns in self.check_columns():
+					self.clear_column(columns)
 
 		self.update_highest_cells()
 
@@ -72,19 +73,19 @@ class Game:
 					actions.append(Action(x, y, block))
 		return actions
 
-	def generate_successor(self, action: Action):
+	def generate_successor(self, action: Action, clear_line: bool):
 		successor = Game(None)
 		successor.board = copy.deepcopy(self.board)
 		successor.points = self.points
 		successor.current_blocks = [Block(block.block_list_index, self.blocks, None, False) for block in self.current_blocks]
-		successor.apply_action(action)
+		successor.apply_action(action, clear_line=clear_line)
 		return successor
 
 	def get_successors(self):
 		successors = []
 		for block in self.current_blocks:
 			for action in self.get_legal_actions(block):
-				successors.append((self.generate_successor(action), action))
+				successors.append((self.generate_successor(action, True), action))
 		return successors
 
 	def generate_successor_2(self, action: Action,size:int):
@@ -92,13 +93,13 @@ class Game:
 			successor = Game(None)
 			successor.board = copy.deepcopy(self.board)
 			successor.current_blocks = [Block(block.block_list_index, self.blocks, None, False) for block in self.current_blocks]
-			successor.apply_action(action)
+			successor.apply_action(action, clear_line=True)
 			return successor
 		else:
 			successor = Game(None)
 			successor.board = copy.deepcopy(self.board)
 			successor.current_blocks = self.current_blocks
-			successor.apply_action(action)
+			successor.apply_action(action, clear_line=True)
 			successor.current_blocks = []
 			return successor
 
