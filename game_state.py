@@ -153,7 +153,7 @@ class Game:
 	def generate_blocks(self):
 		self.current_blocks = []
 		for i in range(0, 3):
-			self.current_blocks.append(Block(random.choices(range(len(self.blocks.block_list)), weights=self.blocks.probabilities, k=1),
+			self.current_blocks.append(Block(random.choices(range(len(self.blocks.block_list)), weights=self.blocks.probabilities, k=1)[0],
 											 self.blocks, self.gui, self.gui_for_blocks))
 
 
