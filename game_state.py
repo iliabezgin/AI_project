@@ -178,15 +178,16 @@ class Game:
 		return False
 
 	def find_highest_cell(self):
-		highest_cells = {}
-		for row in range(10):
-			for col in range(10):
-				if col not in highest_cells:
-					if self.board[row][col]:
-						highest_cells[col] = row
-					else:
-						highest_cells[col] = 9
-		return highest_cells
+		# highest_cells = {}
+		# for row in range(10):
+		# 	for col in range(10):
+		# 		if col not in highest_cells:
+		# 			if self.board[row][col]:
+		# 				highest_cells[col] = row
+		# 			else:
+		# 				highest_cells[col] = 9
+		# return highest_cells
+		pass
 
 	def update_highest_cells(self):
 		self.highest_cells = self.find_highest_cell()

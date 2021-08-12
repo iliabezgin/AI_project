@@ -36,11 +36,12 @@ class HumanAgent(Agent):
 	def get_type(self):
 		return "HumanAgent"
 
-class ComputerAgent(Agent):
+class LocalSearchAgent(Agent):
 
-	def __init__(self, board_heuristic, block_heuristic):
+	def __init__(self, board_heuristic, board_action_heuristic, block_heuristic):
 		super().__init__()
 		self.board_heuristic = board_heuristic
+		self.board_action_heuristic = board_action_heuristic
 		self.block_heuristic = block_heuristic
 
 	def get_action(self, game_state: Game):
@@ -53,7 +54,8 @@ class ComputerAgent(Agent):
 			legal_moves = game_state.get_legal_actions(selected_block)
 
 		# Choose one of the best actions
-		scores = [self.board_heuristic(game_state.generate_successor(action, True)) for action in legal_moves]
+		scores = [self.board_heuristic(game_state.generate_successor(action, True)) +
+				  self.board_action_heuristic(game_state, action) for action in legal_moves]
 		best_score = max(scores)
 		best_indices = [index for index in range(len(scores)) if scores[index] == best_score]
 		chosen_index = np.random.choice(best_indices)  # Pick randomly among the best
@@ -66,14 +68,14 @@ class ComputerAgent(Agent):
 			if block not in ignore_list:
 				blocks_scores.append(self.block_heuristic(game_state, block))
 			else:
-				blocks_scores.append(-1)
+				blocks_scores.append(-np.inf)
 		block_index = np.argmax(blocks_scores)
 		return game_state.current_blocks[block_index]
 
 	def get_type(self):
-		return "ComputerAgent"
+		return "LocalSearchAgent"
 
-class SearchAgent(Agent):
+class AStarAgent(Agent):
 	def __init__(self, board_heuristic, board_action_heuristic):
 		super().__init__()
 		self.board_heuristic = board_heuristic
@@ -93,7 +95,7 @@ class SearchAgent(Agent):
 		return action
 
 	def get_type(self):
-		return "SearchAgent"
+		return "AStarAgent"
 
 	def a_star_search(self, game):
 		"""
@@ -132,9 +134,9 @@ class AgentFactory():
 	def create_agent(agent_name, test_board_heuristic, board_action_heuristic, test_block_heuristic):
 		if agent_name == "HumanAgent":
 			return HumanAgent()
-		if agent_name == "ComputerAgent":
-			return ComputerAgent(test_board_heuristic, test_block_heuristic)
-		if agent_name == "SearchAgent":
-			return SearchAgent(test_board_heuristic, board_action_heuristic)
+		if agent_name == "LocalSearchAgent":
+			return LocalSearchAgent(test_board_heuristic, board_action_heuristic, test_block_heuristic)
+		if agent_name == "AStarAgent":
+			return AStarAgent(test_board_heuristic, board_action_heuristic)
 		if agent_name == "AlphaBetaAgent":
 			return AlphaBetaAgent()

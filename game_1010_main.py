@@ -80,7 +80,7 @@ class Main:
             self.turns += 1
 
         GUILoseScreen(self.window, self.game, self.lose_img)
-        print(self.game.points)
+        # print(self.game.points)
         return self.game.points
 
     def apply_action(self, action: Action):
