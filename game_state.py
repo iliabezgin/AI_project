@@ -55,6 +55,18 @@ class Game:
 		if clear_line:
 			lines = self.check_lines()
 			columns = self.check_columns()
+			total_to_clear = len(lines) + len(columns)
+			if total_to_clear > 1:
+				if total_to_clear == 2:
+					self.add_points(10)
+				elif total_to_clear == 3:
+					self.add_points(30)
+				elif total_to_clear == 4:
+					self.add_points(60)
+				elif total_to_clear == 5:
+					self.add_points(100)
+				elif total_to_clear == 6:
+					self.add_points(150)
 
 			if len(lines) > 0:
 				for line in lines:
@@ -63,6 +75,7 @@ class Game:
 			if len(columns) > 0:
 				for columns in self.check_columns():
 					self.clear_column(columns)
+
 
 		self.update_highest_cells()
 

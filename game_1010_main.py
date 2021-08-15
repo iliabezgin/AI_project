@@ -6,43 +6,46 @@ from game_state import Game
 
 
 class Main:
-    def __init__(self, agent: Agent, sleep_between_actions=True):
-
+    def __init__(self, agent: Agent, sleep_between_actions=True, has_gui=False):
+        self.has_gui = has_gui
         self.sleep_between_actions = sleep_between_actions
         self.agent = agent
+        self.game = Game(None)
 
-        self.window = Tk()
-        self.window.title("1010")
-        self.window.geometry("600x750")
-        self.window.configure(background='#474747')
-        self.window.resizable(False, False)
+        if self.has_gui:
+            self.window = Tk()
+            self.window.title("1010")
+            self.window.geometry("600x750")
+            self.window.configure(background='#474747')
+            self.window.resizable(False, False)
 
-        self.last_x = None
-        self.last_y = None
-        self.last_preview = []
+            self.last_x = None
+            self.last_y = None
+            self.last_preview = []
 
-        self.points_label = Label(self.window, font=("Segoe UI Light", 24), bg="#474747", fg="lightgray")
-        self.points_label["text"] = "0"
-        self.points_label.place(x=(300 - self.points_label.winfo_width() / 2), y=10)
+            self.points_label = Label(self.window, font=("Segoe UI Light", 24), bg="#474747", fg="lightgray")
+            self.points_label["text"] = "0"
+            self.points_label.place(x=(300 - self.points_label.winfo_width() / 2), y=10)
 
-        self.canvas = Canvas(self.window, width=500, height=500, bg="lightgray", highlightthickness=0)
+            self.canvas = Canvas(self.window, width=500, height=500, bg="lightgray", highlightthickness=0)
 
-        self.canvas.place(x=50, y=75)
+            self.canvas.place(x=50, y=75)
 
-        self.lose_img = PhotoImage(file='resources/LoseScreen.png')
-        self.img = PhotoImage(file='resources/DragAndDropOverlay.gif')
-        self.bc_overlay = PhotoImage(file='resources/BlockCanvasOverlay.gif')
+            self.lose_img = PhotoImage(file='resources/LoseScreen.png')
+            self.img = PhotoImage(file='resources/DragAndDropOverlay.gif')
+            self.bc_overlay = PhotoImage(file='resources/BlockCanvasOverlay.gif')
 
-        self.block_canvas = Canvas(self.window, width=500, height=125, bg="lightgray", highlightthickness=0)
-        self.block_canvas.place(x=50, y=525 + 50 + 25)
+            self.block_canvas = Canvas(self.window, width=500, height=125, bg="lightgray", highlightthickness=0)
+            self.block_canvas.place(x=50, y=525 + 50 + 25)
 
-        self.block_canvas.create_image(0, 0, image=self.bc_overlay, anchor="nw")
-        self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor="nw")
+            self.block_canvas.create_image(0, 0, image=self.bc_overlay, anchor="nw")
+            self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor="nw")
 
-        self.game = Game(self)
+            self.game = Game(self)
+            GUILoseScreen(self.window, self.game, self.lose_img)
+
         self.game.generate_blocks()
         self.turns = 0
-        # GUILoseScreen(self.window, self.game, self.lose_img)
         if agent.get_type() == "HumanAgent":
             self.canvas.bind("<Button-1>", self.canvas_click)
             self.canvas.bind("<Motion>", self.render_preview)
@@ -51,8 +54,9 @@ class Main:
             self.window.mainloop()
 
         else:
-            self.render_current_blocks()
-            self.window.update()
+            if self.has_gui:
+                self.render_current_blocks()
+                self.window.update()
             self.points = self._game_loop()
 
 
@@ -64,23 +68,17 @@ class Main:
         while self.game.is_action_possible():
             if self.sleep_between_actions:
                 time.sleep(1)
-            #
-            # a = Action(0, 0, self.game.current_blocks[0])
-            # first = self.game.generate_successor(a)
-            # second = self.game.generate_successor(a)
-            # s = set()
-            # s.add(str(first.board))
-            # print(str(second.board) in s)
             action = self.agent.get_action(self.game)
 
             self.apply_action(action)
             #GUI
-            self.render_current_blocks()
-            self.window.update()
+            if self.has_gui:
+                self.render_current_blocks()
+                self.window.update()
             self.turns += 1
 
-        GUILoseScreen(self.window, self.game, self.lose_img)
-        # print(self.game.points)
+        if self.has_gui:
+            GUILoseScreen(self.window, self.game, self.lose_img)
         return self.game.points
 
     def apply_action(self, action: Action):
@@ -89,8 +87,9 @@ class Main:
         coordinates = action.block.coord_array
         if self.game.fits(x, y, coordinates):
             for index in range(0, len(coordinates)):
-                self.draw_rect_on_coordinates(x + coordinates[index][0],
-                                              y + coordinates[index][1])
+                if self.has_gui:
+                    self.draw_rect_on_coordinates(x + coordinates[index][0],
+                                                  y + coordinates[index][1])
                 self.game.set_filed(x + coordinates[index][0],
                                     y + coordinates[index][1], 1)
             self.selected_block = None
@@ -98,24 +97,39 @@ class Main:
                 if block.block_list_index == action.block.block_list_index:
                     self.game.current_blocks.remove(block)
                     break
-            action.block.destroy()
+            if self.has_gui:
+                action.block.destroy()
             if len(self.game.current_blocks) == 0:
                 self.game.generate_blocks()
 
         lines = self.game.check_lines()
         columns = self.game.check_columns()
 
+        total_to_clear = len(lines) + len(columns)
+        if total_to_clear > 1:
+            if total_to_clear == 2:
+                self.game.add_points(10)
+            elif total_to_clear == 3:
+                self.game.add_points(30)
+            elif total_to_clear == 4:
+                self.game.add_points(60)
+            elif total_to_clear == 5:
+                self.game.add_points(100)
+            elif total_to_clear == 6:
+                self.game.add_points(150)
         if len(lines) > 0:
             for line in lines:
                 self.game.clear_line(line)
-                for i in range(0, 10):
-                    self.clear_rect_on_coordinates(i, line)
+                if self.has_gui:
+                    for i in range(0, 10):
+                        self.clear_rect_on_coordinates(i, line)
 
         if len(columns) > 0:
             for column in columns:
                 self.game.clear_column(column)
-                for i in range(0, 10):
-                    self.clear_rect_on_coordinates(column, i)
+                if self.has_gui:
+                    for i in range(0, 10):
+                        self.clear_rect_on_coordinates(column, i)
 
         self.game.update_highest_cells()
 
@@ -221,8 +235,9 @@ class Main:
         self.canvas.delete(img_id)
 
     def destroy(self):
-        self.canvas.destroy()
-        self.window.destroy()
+        if self.has_gui:
+            self.canvas.destroy()
+            self.window.destroy()
 
 
 class GUILoseScreen:
@@ -237,4 +252,3 @@ class GUILoseScreen:
         self.points_label.place(
             x=(300 - self.points_label.winfo_width() / 2) - 50, y=10)
 
-# main = Main()

@@ -7,14 +7,14 @@ from heuristics import *
 import pandas as pd
 import time
 
-# fs = 1
-# os = 50
-# s = 2.5
-# rcc = 0.5
 fs = 1
 os = 50
 s = 2.5
-rcc = 0
+rcc = 0.499
+# fs = 0
+# os = 0
+# s = 0
+# rcc = 0
 
 
 
@@ -52,6 +52,7 @@ if __name__ == '__main__':
 	agents = ['HumanAgent', 'LocalSearchAgent', 'AStarAgent', 'AlphaBetaAgent', 'MinmaxAgent']
 	parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
 	parser.add_argument('--sleep', help='Does sleep between actions', default=False, action='store_true')
+	parser.add_argument('--gui', help='Whether to turn GUI on', default=False, action='store_true')
 	parser.add_argument('--repeat', help='The number of repetitions of the hole game', default=1, type=int)
 	parser.add_argument('--output', help='Path to output directory (with \"/\" at the end)', default=None)
 
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 	for repetition in range(args.repeat):
 		start = time.time()
 		agent = AgentFactory.create_agent(args.agent, test_board_heuristic, test_board_action_heuristic, test_block_heuristic)
-		main_game = game_1010_main.Main(agent=agent, sleep_between_actions=args.sleep)
+		main_game = game_1010_main.Main(agent=agent, sleep_between_actions=args.sleep, has_gui=args.gui)
 		points.append(main_game.points)
 		main_game.destroy()
 		duration = time.time() - start
