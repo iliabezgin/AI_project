@@ -10,7 +10,7 @@ import time
 fs = 1
 os = 50
 s = 2.5
-rcc = 0.499
+rcc = 0.5
 # fs = 0
 # os = 0
 # s = 0

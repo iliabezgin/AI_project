@@ -12,7 +12,7 @@ class Main:
         self.agent = agent
         self.game = Game(None)
 
-        if self.has_gui:
+        if self.has_gui or agent.get_type() == "HumanAgent":
             self.window = Tk()
             self.window.title("1010")
             self.window.geometry("600x750")
@@ -42,7 +42,7 @@ class Main:
             self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor="nw")
 
             self.game = Game(self)
-            GUILoseScreen(self.window, self.game, self.lose_img)
+            # GUILoseScreen(self.window, self.game, self.lose_img)
 
         self.game.generate_blocks()
         self.turns = 0
@@ -67,7 +67,7 @@ class Main:
         '''
         while self.game.is_action_possible():
             if self.sleep_between_actions:
-                time.sleep(1)
+                time.sleep(0.1)
             action = self.agent.get_action(self.game)
 
             self.apply_action(action)
