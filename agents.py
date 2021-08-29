@@ -2,7 +2,6 @@ import abc
 from game_state import Game
 import numpy as np
 
-from game_agents_ronel_omri import AlphaBetaAgent
 from util import PriorityQueue
 
 
@@ -127,7 +126,7 @@ class Node:
 	def __init__(self, state, actions):
 		self.state = state
 		self.actions = actions
-
+from game_agents_ronel_omri import AlphaBetaAgent
 class AgentFactory():
 	from game_agents_ronel_omri import MinmaxAgent, AlphaBetaAgent
 	@staticmethod
