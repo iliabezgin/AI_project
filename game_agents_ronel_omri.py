@@ -335,6 +335,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             comb_lst = []
             while len(comb_lst) != NUM_OF_BETA_AGENT:
                 block_3 = np.random.choice(blocks, size=3, p=b.probabilities)
+                block_3 = list(block_3)
                 if block_3 not in comb_lst: comb_lst.append(block_3)
             # for i in range(NUM_OF_BETA_AGENT):
             #     comb_lst.append(np.random.choice(blocks, size=3, p=b.probabilities))
