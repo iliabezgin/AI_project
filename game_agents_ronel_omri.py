@@ -108,7 +108,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         for block in game_state.current_blocks:
             actions += game_state.get_legal_actions(block)
         successors = np.array(
-            [self.Minimax(game_state.generate_successor(action, True), 0, False) for action in actions])
+            [self.Minimax(game_state.generate_successor(action, True), 0, False,[action]) for action in actions])
         # return the max
         return actions[np.argmax(successors)]
 
