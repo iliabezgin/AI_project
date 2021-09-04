@@ -51,7 +51,7 @@ def generate_successor_for_minAgent(node: Game, blocks_list: list):
     """
     Gets a board of the game and puts into it the 3 pieces
     :param node:
-    :param blocks_list:
+    :param blocks_list: 3 pieces to puts in the board
     :return:
     """
     successor = Game(None)
