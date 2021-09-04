@@ -35,7 +35,7 @@ class HumanAgent(Agent):
 	def get_type(self):
 		return "HumanAgent"
 
-class LocalSearchAgent(Agent):
+class GreedyBFSSingleAgent(Agent):
 
 	def __init__(self, board_heuristic, board_action_heuristic, block_heuristic):
 		super().__init__()
@@ -72,9 +72,9 @@ class LocalSearchAgent(Agent):
 		return game_state.current_blocks[block_index]
 
 	def get_type(self):
-		return "LocalSearchAgent"
+		return "GreedyBFSSingleAgent"
 
-class AStarAgent(Agent):
+class GreedyBFSTripleAgent(Agent):
 	def __init__(self, board_heuristic, board_action_heuristic):
 		super().__init__()
 		self.board_heuristic = board_heuristic
@@ -83,9 +83,9 @@ class AStarAgent(Agent):
 
 	def get_action(self, game_state: Game):
 		if len(self.actions) == 0:
-			self.actions = self.a_star_search(game_state)
+			self.actions = self.greedy_search(game_state)
 		if len(self.actions) == 0:
-			self.actions = self.a_star_search(game_state)
+			self.actions = self.greedy_search(game_state)
 		action = self.actions.pop(0)
 		for block in game_state.current_blocks:
 			if block.block_list_index == action.block.block_list_index:
@@ -94,9 +94,9 @@ class AStarAgent(Agent):
 		return action
 
 	def get_type(self):
-		return "AStarAgent"
+		return "GreedyBFSTripleAgent"
 
-	def a_star_search(self, game):
+	def greedy_search(self, game):
 		"""
 		Search the node that has the lowest combined cost and heuristic first.
 		"""
@@ -120,22 +120,26 @@ class AStarAgent(Agent):
 		return current.actions
 
 
-
-
 class Node:
 	def __init__(self, state, actions):
 		self.state = state
 		self.actions = actions
-from game_agents_ronel_omri import AlphaBetaAgent
+from game_agents_ronel_omri import AlphaBetaAgent, AlphaBetaAgentV2, AlphaBetaAgentV3
+
+
 class AgentFactory():
-	from game_agents_ronel_omri import MinmaxAgent, AlphaBetaAgent
 	@staticmethod
-	def create_agent(agent_name, test_board_heuristic, board_action_heuristic, test_block_heuristic):
+	def create_agent(agent_name, test_board_heuristic, board_action_heuristic, test_block_heuristic, version, depth):
 		if agent_name == "HumanAgent":
 			return HumanAgent()
-		if agent_name == "LocalSearchAgent":
-			return LocalSearchAgent(test_board_heuristic, board_action_heuristic, test_block_heuristic)
-		if agent_name == "AStarAgent":
-			return AStarAgent(test_board_heuristic, board_action_heuristic)
+		if agent_name == "GreedyBFSSingleAgent":
+			return GreedyBFSSingleAgent(test_board_heuristic, board_action_heuristic, test_block_heuristic)
+		if agent_name == "GreedyBFSTripleAgent":
+			return GreedyBFSTripleAgent(test_board_heuristic, board_action_heuristic)
 		if agent_name == "AlphaBetaAgent":
-			return AlphaBetaAgent()
+			if version == 1:
+				return AlphaBetaAgent(depth=depth)
+			if version == 2:
+				return AlphaBetaAgentV2(depth=depth)
+			if version == 3:
+				return AlphaBetaAgentV3(depth=depth)

@@ -32,9 +32,9 @@ class Agent(object):
         return
 
 
-from agents import AStarAgent
-from main import test_board_heuristic, test_board_action_heuristic, test_block_heuristic
-from itertools import combinations_with_replacement, combinations
+from agents import GreedyBFSTripleAgent
+from main import test_board_heuristic, test_board_action_heuristic
+from itertools import combinations_with_replacement
 from heusristics_ilia import *
 
 
@@ -92,7 +92,7 @@ class MultiAgentSearchAgent(Agent):
         self.evaluation_function = evaluation_function
         self.depth = depth
         self.actions = []
-        self.helper = AStarAgent(test_board_heuristic, test_board_action_heuristic)
+        self.helper = GreedyBFSTripleAgent(test_board_heuristic, test_board_action_heuristic)
         # self.helper =  LocalSearchAgent(test_board_heuristic, test_board_action_heuristic, test_block_heuristic)
         self._threes_lists = None
 
@@ -145,7 +145,8 @@ class MinmaxAgent(MultiAgentSearchAgent):
                 [self.Minimax(generate_successor_for_minAgent(node, list(blocks_3)), depth + 1, True) for blocks_3 in
                  list_of_combinations]))
 ####################################################################################################################################
-class AlphaBetaAgent_01(MultiAgentSearchAgent):
+
+class AlphaBetaAgentV3(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning 
     the alpha agent ran for the maximum 30 boys according to heuristics
@@ -153,7 +154,7 @@ class AlphaBetaAgent_01(MultiAgentSearchAgent):
     """
 
     def get_type(self):
-        return "AlphaBetaAgent"
+        return "AlphaBetaAgentV3"
 
     def get_action(self, game_state: Game):
         if len(self.actions) == 0:
@@ -182,11 +183,11 @@ class AlphaBetaAgent_01(MultiAgentSearchAgent):
         best = actions[0]
         possible_move = game_state.generate_successor(best, True)
         # Completes the last 2 moves by the helper agent
-        complet_best = self.helper.a_star_search(possible_move)
+        complet_best = self.helper.greedy_search(possible_move)
 
         for action in actions:
             possible_move = game_state.generate_successor(action, True)
-            moves = self.helper.a_star_search(possible_move)
+            moves = self.helper.greedy_search(possible_move)
             action_list = [action] + moves
             n_alpha = self.AlphaBetaPruning(possible_move, 0, alpha, beta, False, action_list) - possible_move.points
             if n_alpha > alpha:
@@ -223,7 +224,7 @@ class AlphaBetaAgent_01(MultiAgentSearchAgent):
 
             for action in actions:
                 possible_move = node.generate_successor(action, True)
-                new_s = self.helper.a_star_search(possible_move)
+                new_s = self.helper.greedy_search(possible_move)
                 act_list = [action] + new_s
                 alpha = max(alpha, self.AlphaBetaPruning(
                     possible_move, depth,
@@ -240,7 +241,7 @@ class AlphaBetaAgent_01(MultiAgentSearchAgent):
                                    False) for comb in combination]
                 successor = generate_successor_for_minAgent(node, block_lst)
                 # Completes the moves by the helper agent
-                good_act = self.helper.a_star_search(successor)
+                good_act = self.helper.greedy_search(successor)
                 temp_list = list_of_act + good_act
                 temp = self.AlphaBetaPruning(successor, depth + 1, alpha, beta, True, temp_list)
                 beta = min(beta, temp)
@@ -270,13 +271,13 @@ class AlphaBetaAgent_01(MultiAgentSearchAgent):
 
 
 
-class AlphaBetaAgent(MultiAgentSearchAgent):
+class AlphaBetaAgentV2(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning
     """
 
     def get_type(self):
-        return "AlphaBetaAgent"
+        return "AlphaBetaAgentV2"
 
     def get_action(self, game_state: Game):
         if len(self.actions) == 0:
@@ -304,11 +305,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         best = actions[0]
         possible_move = game_state.generate_successor(best, True)
         # Completes the last 2 moves by the helper agent
-        complet_best = self.helper.a_star_search(possible_move)
+        complet_best = self.helper.greedy_search(possible_move)
 
         for action in actions:
             possible_move = game_state.generate_successor(action, True)
-            moves = self.helper.a_star_search(possible_move)
+            moves = self.helper.greedy_search(possible_move)
             action_list = [action] + moves
             n_alpha = self.AlphaBetaPruning(possible_move, 0, alpha, beta, False, action_list) - possible_move.points
             if n_alpha > alpha:
@@ -341,7 +342,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             actions.sort(key=lambda x: surface_heuristic(node, x))
             for action in actions:
                 possible_move = node.generate_successor(action, True)
-                new_s = self.helper.a_star_search(possible_move)
+                new_s = self.helper.greedy_search(possible_move)
                 act_list = [action] + new_s
                 alpha = max(alpha, self.AlphaBetaPruning(
                     possible_move, depth,
@@ -358,12 +359,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                                    False) for comb in combination]
                 successor = generate_successor_for_minAgent(node, block_lst)
                 # Completes the moves by the helper agent
-                good_act = self.helper.a_star_search(successor)
+                good_act = self.helper.greedy_search(successor)
                 temp_list = list_of_act + good_act
                 temp = self.AlphaBetaPruning(successor, depth + 1, alpha, beta, True, temp_list)
-                prob = get_prob(block_lst)
                 beta = min(beta, temp)
-                # beta = min(beta, temp*prob)
                 if alpha >= beta:
                     break
             return beta
@@ -385,8 +384,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 block_3 = np.random.choice(blocks, size=3, p=b.probabilities)
                 block_3 = list(block_3)
                 if block_3 not in comb_lst: comb_lst.append(block_3)
-            # for i in range(NUM_OF_BETA_AGENT):
-            #     comb_lst.append(np.random.choice(blocks, size=3, p=b.probabilities))
             return self._threes_lists
 
 
