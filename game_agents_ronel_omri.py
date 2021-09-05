@@ -76,16 +76,7 @@ def evaluation_function_by_score(current_game_state, list_of_act):
 class MultiAgentSearchAgent(Agent):
     """
     This class provides some common elements to all of your
-    multi-agent searchers.  Any methods defined here will be available
-    to the MinmaxAgent, AlphaBetaAgent & ExpectimaxAgent.
-
-    You *do not* need to make any changes here, but you can if you want to
-    add functionality to all your adversarial search agents.  Please do not
-    remove anything, however.
-
-    Note: this is an abstract class: one that should not be instantiated.  It's
-    only partially specified, and designed to be extended.  Agent (game.py)
-    is another abstract class.
+    multi-agent searchers.
     """
 
     def __init__(self, evaluation_function=evaluation_function_by_score, depth=0):
