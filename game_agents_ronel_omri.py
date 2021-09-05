@@ -95,55 +95,50 @@ class MultiAgentSearchAgent(Agent):
         self.helper = GreedyBFSTripleAgent(test_board_heuristic, test_board_action_heuristic)
         # self.helper =  LocalSearchAgent(test_board_heuristic, test_board_action_heuristic, test_block_heuristic)
         self._threes_lists = None
+        self._node = None
 
     @abc.abstractmethod
     def get_action(self, game_state):
         return
-
-
-class MinmaxAgent(MultiAgentSearchAgent):
-
-    def get_action(self, game_state: Game):
+    
+    @staticmethod
+    def __helper_generate_successor(game_state: Game, act_list: list):
+        """
+        :param game_state: node to be created for it successor
+        :param act_list: Actions we did on the board
+        :return: List of [[board,act_list],...]
+        """
         actions = []
         for block in game_state.current_blocks:
             actions += game_state.get_legal_actions(block)
-        successors = np.array(
-            [self.Minimax(game_state.generate_successor(action, True), 0, False,[action]) for action in actions])
-        # return the max
-        return actions[np.argmax(successors)]
+        board = []
+        for act in actions:
+            board.append([game_state.generate_successor_2(act, len(game_state.current_blocks)), act_list + [act]])
+        return board
 
-    def get_type(self):
-        return "MinimaxAgent"
-
-    def Minimax(self, node: Game, depth: int, isMaxNode: bool, act_list: list):
+    @staticmethod
+    def generate_successor(game_state: Game):
         """
-        :param node: game state
-        :param depth: How deep to look in tree
-        :param isMaxNode: true if the agent is max else false
-        :return: the best move for maxPlayer
+        :param game_state: node to be created for it successor
+        :return: all successor of game_state
         """
-
-        # if we got to depth that we chose in constrctor
-        if depth == self.depth and len(node.current_blocks) == 0:
-            return self.evaluation_function(node, act_list)
-        elif isMaxNode:
-            actions = []
-            for block in node.current_blocks:
-                actions += node.get_legal_actions(block)
-
-            max = np.max(
-                np.array([self.Minimax(node.generate_successor_2(s, len(node.current_blocks)), depth,
-                                       len(node.current_blocks) != 0, act_list + s) for s in actions])) if len(
-                actions) else 0
-            # return the best move that maximiz the point
-            return max
-        else:
-            blocks = node.blocks.block_list
-            list_of_combinations = make_sub_group(blocks, 3)
-            # return the best move that mimaiz
-            return np.min(np.array(
-                [self.Minimax(generate_successor_for_minAgent(node, list(blocks_3)), depth + 1, True) for blocks_3 in
-                 list_of_combinations]))
+        actions_1 = []
+        # do the first act on board
+        for block in game_state.current_blocks:
+            actions_1 += game_state.get_legal_actions(block)
+        board_whit_1_act = []
+        for first_act in actions_1:
+            board_whit_1_act.append(
+                [game_state.generate_successor_2(first_act, len(game_state.current_blocks)), [first_act]])
+        # do the second act on board
+        board_whit_2_act = []
+        for board_act in board_whit_1_act:
+            board_whit_2_act += MultiAgentSearchAgent.__helper_generate_successor(board_act[0], board_act[1])
+        # do the third act on board
+        for board_act in board_whit_2_act:
+            board_whit_3_act = MultiAgentSearchAgent.__helper_generate_successor(board_act[0], board_act[1])
+            for board, act_on_board in board_whit_3_act:
+                yield board, act_on_board
 ####################################################################################################################################
 
 class AlphaBetaAgentV3(MultiAgentSearchAgent):
@@ -386,6 +381,109 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
                 if block_3 not in comb_lst: comb_lst.append(block_3)
             return self._threes_lists
 
+        
+class AlphaBetaAgent(MultiAgentSearchAgent):
+    """
+    Your minimax agent with alpha-beta pruning (question 3)
+    """
+
+    def get_type(self):
+        return "AlphaBetaAgent"
+
+    def get_action(self, game_state: Game):
+        if len(self.actions) == 0:
+            self.actions = self.get_action_of_alphaBeta(game_state)
+        action = self.actions.pop(0)
+        for block in game_state.current_blocks:
+            if block.block_list_index == action.block.block_list_index:
+                action.block = block
+                break
+        return action
+
+    def get_action_of_alphaBeta(self, game_state: Game):
+        """
+        Returns the minimax action using self.depth and self.evaluationFunction
+        """
+        self._node = game_state
+        actions = []
+        for block in game_state.current_blocks:
+            actions += game_state.get_legal_actions(block)
+
+        # sort the action by heuristic
+
+        actions.sort(key=lambda x: surface_heuristic(game_state, x) + row_col_completeness_heuristic(game_state, x))
+        # Initializes with the maximum values for alpha, beta
+        alpha, beta = -float('inf'), float('inf')
+        best = None
+        for board, act_on_board in MultiAgentSearchAgent.generate_successor(game_state):
+            n_alpha = self.AlphaBetaPruning(board, 0, alpha, beta, False, act_on_board) - board.points
+            if n_alpha > alpha:
+                best = act_on_board
+                alpha = n_alpha
+            if alpha >= beta:
+                break
+        self._threes_lists = None
+        return best
+
+    def AlphaBetaPruning(self, node: Game, depth: int, alpha: float, beta: float, maxPlayer: bool, list_of_act: list):
+        """
+        :param node: the game state
+        :param depth: How deep to look in tree
+        :param alpha: the value of alpha plyer
+        :param beta: the value of beta plyer
+        :param maxPlayer: true if plyer is maxPlayer
+        :return: alpha if case of maxPlayer is true and beta other
+        """
+
+        if depth == self.depth:
+            return self.evaluation_function(self._node, list_of_act)
+        if maxPlayer:
+            # get oll legal action for the agent
+            for board, act_on_board in MultiAgentSearchAgent.generate_successor(node):
+                act_list = list_of_act + act_on_board
+                alpha = max(alpha, self.AlphaBetaPruning(
+                    board, depth,
+                    alpha, beta, False, list_of_act + act_list))
+                if alpha >= beta:
+                    break
+            return alpha
+        else:
+            # get oll legal action for the computer
+            list_of_combinations = self._get_threes_list(node)
+            for combination in list_of_combinations:
+                # creat the list of block for beat agent
+                block_lst = [Block(node.blocks.block_list.index(comb), node.blocks, None,
+                                   False) for comb in combination]
+                successor = generate_successor_for_minAgent(node, block_lst, list_of_act)
+                # Completes the moves by the helper agent if depth +1 == self.depth else the alpha agent will complete
+                # the god act
+                good_act = self.helper.a_star_search(successor) if depth + 1 == self.depth else []
+                for act in good_act:
+                    successor = successor.generate_successor(act, True)
+                temp_list = list_of_act + good_act
+                temp = self.AlphaBetaPruning(successor, depth + 1, alpha, beta, True, temp_list)
+                beta = min(beta, temp)
+                if alpha >= beta:
+                    break
+            return beta
+
+    def _get_threes_list(self, node: Game):
+        """
+        :param node:
+        :return: 10 threes of block
+        """
+        if self._threes_lists:
+            return self._threes_lists
+        else:
+            blocks = node.blocks.block_list
+            b = BLOCKS()
+            comb_lst = []
+            while len(comb_lst) != NUM_OF_BETA_AGENT:
+                block_3 = np.random.choice(blocks, size=3, p=b.probabilities)
+                block_3 = list(block_3)
+                if block_3 not in comb_lst: comb_lst.append(block_3)
+            self._threes_lists = comb_lst
+            return self._threes_lists
 
 def get_prob(block_list):
     """
