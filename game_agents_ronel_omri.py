@@ -1,4 +1,3 @@
-# from agents import Agent
 import random
 
 from action import *
@@ -6,6 +5,10 @@ from game_state import Game
 import abc
 import numpy as np
 import copy
+from agents import GreedyBFSTripleAgent
+from main import test_board_heuristic, test_board_action_heuristic
+from itertools import combinations_with_replacement
+from heusristics_ilia import *
 
 # On some subgroups the beta agent tester
 NUM_OF_BETA_AGENT = 10
@@ -32,12 +35,6 @@ class Agent(object):
         return
 
 
-from agents import GreedyBFSTripleAgent
-from main import test_board_heuristic, test_board_action_heuristic
-from itertools import combinations_with_replacement
-from heusristics_ilia import *
-
-
 def make_sub_group(_list, size: int):
     """
     :param _list: list to creat sub group
@@ -60,6 +57,11 @@ def generate_successor_for_minAgent(node: Game, blocks_list: list):
     return successor
 
 def evaluation_function_by_score(current_game_state, list_of_act):
+    """
+    :param current_game_state: board
+    :param list_of_act: List of actions to do on the board
+    :return: score
+    """
     n2 = 0
     for act in list_of_act:
         n2 += 2.5 * surface_heuristic(current_game_state, act)
@@ -84,14 +86,13 @@ class MultiAgentSearchAgent(Agent):
         self.depth = depth
         self.actions = []
         self.helper = GreedyBFSTripleAgent(test_board_heuristic, test_board_action_heuristic)
-        # self.helper =  LocalSearchAgent(test_board_heuristic, test_board_action_heuristic, test_block_heuristic)
         self._threes_lists = None
         self._node = None
 
     @abc.abstractmethod
     def get_action(self, game_state):
         return
-    
+
     @staticmethod
     def __helper_generate_successor(game_state: Game, act_list: list):
         """
@@ -130,6 +131,8 @@ class MultiAgentSearchAgent(Agent):
             board_whit_3_act = MultiAgentSearchAgent.__helper_generate_successor(board_act[0], board_act[1])
             for board, act_on_board in board_whit_3_act:
                 yield board, act_on_board
+
+
 ####################################################################################################################################
 
 class AlphaBetaAgentV3(MultiAgentSearchAgent):
@@ -156,9 +159,9 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-
+        self._node = game_state
         actions = []
-        func = lambda x: surface_heuristic(game_state, x) + row_col_completeness_heuristic(game_state, x)
+        func = lambda x: 2.5 * surface_heuristic(game_state, x) + 0.5 * row_col_completeness_heuristic(game_state, x)
         for block in game_state.current_blocks:
             ac = game_state.get_legal_actions(block)
             ac.sort(key=func)
@@ -174,6 +177,8 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
         for action in actions:
             possible_move = game_state.generate_successor(action, True)
             moves = self.helper.greedy_search(possible_move)
+            for act in moves:
+                possible_move = possible_move.generate_successor(act, True)
             action_list = [action] + moves
             n_alpha = self.AlphaBetaPruning(possible_move, 0, alpha, beta, False, action_list) - possible_move.points
             if n_alpha > alpha:
@@ -197,12 +202,12 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
         """
 
         if depth == self.depth:
-            return self.evaluation_function(node, list_of_act)
+            return self.evaluation_function(self._node, list_of_act)
         if maxPlayer:
             # get oll legal action for the agent
             actions = []
 
-            func = lambda x: surface_heuristic(node, x) + row_col_completeness_heuristic(node, x)
+            func = lambda x: 2.5 * surface_heuristic(game_state, x) + 0.5 * row_col_completeness_heuristic(game_state, x)
             for block in node.current_blocks:
                 ac = node.get_legal_actions(block)
                 ac.sort(key=func)
@@ -211,6 +216,8 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
             for action in actions:
                 possible_move = node.generate_successor(action, True)
                 new_s = self.helper.greedy_search(possible_move)
+                for act in new_s:
+                    possible_move = possible_move.generate_successor(act, True)
                 act_list = [action] + new_s
                 alpha = max(alpha, self.AlphaBetaPruning(
                     possible_move, depth,
@@ -219,6 +226,7 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
                     break
             return alpha
         else:
+
             # get oll legal action for the computer
             list_of_combinations = self._get_threes_list(node)
             for combination in list_of_combinations:
@@ -227,7 +235,9 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
                                    False) for comb in combination]
                 successor = generate_successor_for_minAgent(node, block_lst)
                 # Completes the moves by the helper agent
-                good_act = self.helper.greedy_search(successor)
+                good_act = self.helper.greedy_search(successor) if depth + 1 == self.depth else []
+                for act in good_act:
+                    successor = successor.generate_successor(act, True)
                 temp_list = list_of_act + good_act
                 temp = self.AlphaBetaPruning(successor, depth + 1, alpha, beta, True, temp_list)
                 beta = min(beta, temp)
@@ -253,8 +263,8 @@ class AlphaBetaAgentV3(MultiAgentSearchAgent):
             self._threes_lists = comb_lst
             return self._threes_lists
 
-########################################################################################################################
 
+########################################################################################################################
 
 
 class AlphaBetaAgentV2(MultiAgentSearchAgent):
@@ -279,7 +289,7 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-
+        self._node = game_state
         actions = []
         for block in game_state.current_blocks:
             actions += game_state.get_legal_actions(block)
@@ -292,11 +302,14 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
         possible_move = game_state.generate_successor(best, True)
         # Completes the last 2 moves by the helper agent
         complet_best = self.helper.greedy_search(possible_move)
-
+        for act in complet_best:
+            possible_move = possible_move.generate_successor(act, True)
         for action in actions:
             possible_move = game_state.generate_successor(action, True)
             moves = self.helper.greedy_search(possible_move)
             action_list = [action] + moves
+            for act in moves:
+                possible_move = possible_move.generate_successor(act, True)
             n_alpha = self.AlphaBetaPruning(possible_move, 0, alpha, beta, False, action_list) - possible_move.points
             if n_alpha > alpha:
                 best = action
@@ -319,7 +332,7 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
         """
 
         if depth == self.depth:
-            return self.evaluation_function(node, list_of_act)
+            return self.evaluation_function(self._node, list_of_act)
         if maxPlayer:
             # get oll legal action for the agent
             actions = []
@@ -329,6 +342,8 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
             for action in actions:
                 possible_move = node.generate_successor(action, True)
                 new_s = self.helper.greedy_search(possible_move)
+                for act in new_s:
+                    possible_move = possible_move.generate_successor(act, True)
                 act_list = [action] + new_s
                 alpha = max(alpha, self.AlphaBetaPruning(
                     possible_move, depth,
@@ -345,7 +360,9 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
                                    False) for comb in combination]
                 successor = generate_successor_for_minAgent(node, block_lst)
                 # Completes the moves by the helper agent
-                good_act = self.helper.greedy_search(successor)
+                good_act = self.helper.greedy_search(successor) if depth + 1 == self.depth else []
+                for act in good_act:
+                    successor = successor.generate_successor(act, True)
                 temp_list = list_of_act + good_act
                 temp = self.AlphaBetaPruning(successor, depth + 1, alpha, beta, True, temp_list)
                 beta = min(beta, temp)
@@ -372,7 +389,7 @@ class AlphaBetaAgentV2(MultiAgentSearchAgent):
                 if block_3 not in comb_lst: comb_lst.append(block_3)
             return self._threes_lists
 
-        
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -413,7 +430,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 alpha = n_alpha
             if alpha >= beta:
                 break
-        self._threes_lists = None
         return best
 
     def AlphaBetaPruning(self, node: Game, depth: int, alpha: float, beta: float, maxPlayer: bool, list_of_act: list):
@@ -445,10 +461,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # creat the list of block for beat agent
                 block_lst = [Block(node.blocks.block_list.index(comb), node.blocks, None,
                                    False) for comb in combination]
-                successor = generate_successor_for_minAgent(node, block_lst, list_of_act)
+                successor = generate_successor_for_minAgent(node, block_lst)
                 # Completes the moves by the helper agent if depth +1 == self.depth else the alpha agent will complete
                 # the god act
-                good_act = self.helper.a_star_search(successor) if depth + 1 == self.depth else []
+                good_act = self.helper.greedy_search(successor) if depth + 1 == self.depth else []
                 for act in good_act:
                     successor = successor.generate_successor(act, True)
                 temp_list = list_of_act + good_act
@@ -467,14 +483,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return self._threes_lists
         else:
             blocks = node.blocks.block_list
-            b = BLOCKS()
-            comb_lst = []
-            while len(comb_lst) != NUM_OF_BETA_AGENT:
-                block_3 = np.random.choice(blocks, size=3, p=b.probabilities)
-                block_3 = list(block_3)
-                if block_3 not in comb_lst: comb_lst.append(block_3)
-            self._threes_lists = comb_lst
+            self._threes_lists = make_sub_group(blocks, 3)
             return self._threes_lists
+
 
 def get_prob(block_list):
     """
